@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ファイルアップローダー</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+</head>
+<body>
+    <h2>ファイルアップロード</h2>
+    <input type="file" id="fileInput">
+    <h2>アップロード済みファイル</h2>
+    <ul id="fileList"></ul>
+
+    <script>
+        // Supabaseの設定
+        const SUPABASE_URL = "https://xxxxxxxx.supabase.co"; // SupabaseのURLに置き換え
+        const SUPABASE_ANON_KEY = "your-anon-key"; // APIキー（anon key）を入力
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        const fileInput = document.getElementById("fileInput");
+        const fileList = document.getElementById("fileList");
+
+        // ファイル選択時に自動アップロード
+        fileInput.addEventListener("change", async (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const { data, error } = await supabase.storage.from("upload").upload(file.name, file);
+
+            if (error) {
+                alert("アップロードに失敗しました");
+                console.error(error);
+            } else {
+                alert("アップロード成功！");
+                loadFiles();
+            }
+        });
+
+        // ファイル一覧を取得して表示
+        async function loadFiles() {
+            const { data, error } = await supabase.storage.from("upload").list();
+
+            if (error) {
+                console.error("ファイル一覧の取得に失敗", error);
+                return;
+            }
+
+            fileList.innerHTML = "";
+            data.forEach(file => {
+                const li = document.createElement("li");
+                li.textContent = file.name;
+
+                const downloadButton = document.createElement("button");
+                downloadButton.textContent = "ダウンロード";
+                downloadButton.onclick = async () => {
+                    const { data } = await supabase.storage.from("upload").getPublicUrl(file.name);
+                    window.open(data.publicUrl, "_blank");
+                };
+
+                li.appendChild(downloadButton);
+                fileList.appendChild(li);
+            });
+        }
+
+        // 初回ロード時にファイル一覧を取得
+        loadFiles();
+    </script>
+</body>
+</html>
