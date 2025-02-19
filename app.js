@@ -15,7 +15,7 @@ document.getElementById("sendMessageButton").addEventListener("click", function(
   fetch("https://notify-api.line.me/api/notify", {
     method: "POST",
     headers: {
-      "Authorization": `Bearer uZH3TcoO9Z4yJXpiFOU8e6tM6uVxndECYc2cPuD7AEd` // ここにLINE Notifyのアクセストークンを記入
+      "Authorization": `UZWMz3tKn9DvqI7d8pc24MItSqN496vvpeBAjgcsFWX` // ここにLINE Notifyのアクセストークンを記入
     },
     body: formData,
     mode: "no-cors"  // CORS無視
