@@ -3,68 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ファイルアップローダー</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <title>LINEに画像とテキストを送る</title>
 </head>
 <body>
-    <h2>ファイルアップロード</h2>
-    <input type="file" id="fileInput">
-    <h2>アップロード済みファイル</h2>
-    <ul id="fileList"></ul>
+    <h1>LINEに画像とメッセージを送る</h1>
+    
+    <textarea id="message" placeholder="ここにメッセージを入力"></textarea><br>
+    <input type="file" id="imageInput" accept="image/*"><br>
+    <button onclick="sendToLine()">送信</button>
 
     <script>
-        // Supabaseの設定
-        const SUPABASE_URL = "https://xxxxxxxx.supabase.co"; // SupabaseのURLに置き換え
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBoYWdteG5uZ2FzdWFvYmhiZGl0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzk2OTM2ODEsImV4cCI6MjA1NTI2OTY4MX0.y0Wd212v-heX0ZRMqVn0JK7uJZ-09lvNIsH4o3UHpfI"; // APIキー（anon key）を入力
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        async function sendToLine() {
+            const message = document.getElementById("message").value;
+            const imageInput = document.getElementById("imageInput").files[0];
+            const token = "uZH3TcoO9Z4yJXpiFOU8e6tM6uVxndECYc2cPuD7AEd";  // LINE Notify のトークンをここに入れる
 
-        const fileInput = document.getElementById("fileInput");
-        const fileList = document.getElementById("fileList");
-
-        // ファイル選択時に自動アップロード
-        fileInput.addEventListener("change", async (event) => {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const { data, error } = await supabase.storage.from("upload").upload(file.name, file);
-
-            if (error) {
-                alert("アップロードに失敗しました");
-                console.error(error);
-            } else {
-                alert("アップロード成功！");
-                loadFiles();
-            }
-        });
-
-        // ファイル一覧を取得して表示
-        async function loadFiles() {
-            const { data, error } = await supabase.storage.from("upload").list();
-
-            if (error) {
-                console.error("ファイル一覧の取得に失敗", error);
+            if (!message && !imageInput) {
+                alert("メッセージまたは画像を入力してください！");
                 return;
             }
 
-            fileList.innerHTML = "";
-            data.forEach(file => {
-                const li = document.createElement("li");
-                li.textContent = file.name;
+            const formData = new FormData();
+            formData.append("message", message || "(画像のみ送信)");
+            if (imageInput) {
+                formData.append("imageFile", imageInput);
+            }
 
-                const downloadButton = document.createElement("button");
-                downloadButton.textContent = "ダウンロード";
-                downloadButton.onclick = async () => {
-                    const { data } = await supabase.storage.from("upload").getPublicUrl(file.name);
-                    window.open(data.publicUrl, "_blank");
-                };
+            try {
+                const response = await fetch("https://notify-api.line.me/api/notify", {
+                    method: "POST",
+                    headers: { "Authorization": `Bearer ${token}` },
+                    body: formData
+                });
 
-                li.appendChild(downloadButton);
-                fileList.appendChild(li);
-            });
+                if (response.ok) {
+                    alert("LINEに送信しました！");
+                } else {
+                    alert("送信に失敗しました");
+                }
+            } catch (error) {
+                alert("エラーが発生しました");
+                console.error(error);
+            }
         }
-
-        // 初回ロード時にファイル一覧を取得
-        loadFiles();
     </script>
 </body>
 </html>
