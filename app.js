@@ -12,20 +12,20 @@ document.getElementById("sendMessageButton").addEventListener("click", function(
   const formData = new FormData();
   formData.append("message", message); // 入力されたメッセージをFormDataに追加
 
-  fetch("https://notify-api.line.me/api/notify", {
-    method: "POST",
-    headers: {
-      "Authorization": `UZWMz3tKn9DvqI7d8pc24MItSqN496vvpeBAjgcsFWX` // ここにLINE Notifyのアクセストークンを記入
-    },
-    body: formData,
-    mode: "no-cors"  // CORS無視
-  })
-  .then(() => {
-    console.log("メッセージ送信完了（レスポンスは取得しない）");
-    alert("メッセージが送信されました！");
-  })
-  .catch(error => {
-    console.error("エラー:", error);
-    alert("エラーが発生しました。もう一度お試しください。");
-  });
+fetch("https://notify-api.line.me/api/notify", {
+  method: "POST",
+  headers: {
+    "Authorization": `Bearer uZH3TcoO9Z4yJXpiFOU8e6tM6uVxndECYc2cPuD7AEd`  // ここに新しいアクセストークンを挿入
+  },
+  body: formData,
+  mode: "no-cors"  // CORS無視
+})
+.then(() => {
+  console.log("メッセージ送信完了（レスポンスは取得しない）");
+  alert("メッセージが送信されました！");
+})
+.catch(error => {
+  console.error("エラー:", error);
+  alert("エラーが発生しました。もう一度お試しください。");
 });
+
